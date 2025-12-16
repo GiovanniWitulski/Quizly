@@ -1,6 +1,8 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.exceptions import TokenError
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import LoginSerializer, RegistrationSerializer
@@ -72,3 +74,28 @@ class LoginView(APIView):
                     status=status.HTTP_401_UNAUTHORIZED
                 )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class LogoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            refresh_token = request.COOKIES.get('refresh_token')
+            
+            if refresh_token:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+                
+        except TokenError:
+            pass
+        except Exception as e:
+            return Response(status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+        response = Response({
+            "detail": "Log-Out successfull! All Tokens will be deleted. Refresh token is now invalid."
+        }, status=status.HTTP_200_OK)
+
+        response.delete_cookie('access_token')
+        response.delete_cookie('refresh_token')
+
+        return response
