@@ -8,9 +8,27 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .serializers import LoginSerializer, RegistrationSerializer
 
 class RegisterView(APIView):
+    """
+    API View for user registration.
+    
+    Allows any user to create a new account.
+    """
     permission_classes = [] 
 
     def post(self, request):
+        """
+        Creates a new user.
+
+        Request Body:
+            - username (str): Desired username.
+            - email (str): Email address.
+            - password (str): Password.
+            - confirmed_password (str): Password confirmation.
+
+        Returns:
+            201: User created successfully.
+            400: Validation errors (e.g., passwords do not match).
+        """
         serializer = RegistrationSerializer(data=request.data)
         
         if serializer.is_valid():
@@ -23,9 +41,26 @@ class RegisterView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class LoginView(APIView):
+    """
+    API View for user login.
+    
+    Authenticates the user and sets JWT tokens (Access & Refresh) as HTTP-Only cookies.
+    """
     permission_classes = []
 
     def post(self, request):
+        """
+        Logs the user in.
+
+        Request Body:
+            - username (str)
+            - password (str)
+
+        Returns:
+            200: Login successful, cookies set.
+            401: Invalid credentials.
+            400: Malformed request.
+        """
         serializer = LoginSerializer(data=request.data)
         
         if serializer.is_valid():
@@ -76,9 +111,23 @@ class LoginView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class LogoutView(APIView):
+    """
+    API View for user logout.
+    
+    Blacklists the refresh token and deletes authentication cookies.
+    """
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
+        """
+        Performs the logout.
+
+        Expects the 'refresh_token' to be present in the cookies.
+
+        Returns:
+            200: Successfully logged out.
+            500: Server error during blacklisting.
+        """
         try:
             refresh_token = request.COOKIES.get('refresh_token')
             
@@ -101,9 +150,21 @@ class LogoutView(APIView):
         return response
     
 class RefreshTokenView(APIView):
+    """
+    API View to refresh the access token.
+    
+    Reads the refresh token from the cookie and generates a new access token.
+    """
     permission_classes = []
 
     def post(self, request):
+        """
+        Requests a new access token.
+
+        Returns:
+            200: New access token generated and set as cookie.
+            401: Refresh token invalid or missing.
+        """
         refresh_token = request.COOKIES.get('refresh_token')
 
         if not refresh_token:
