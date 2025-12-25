@@ -26,7 +26,7 @@ Quizly is a powerful RESTful API built with Django and Django REST Framework. It
 
 Before running the project, ensure you have the following installed:
 
-* Python 3.10+
+* Python 3.12+
 * **FFmpeg** (Required for `yt-dlp` and `whisper` audio processing)
 
 ## ⚙️ Installation & Setup
