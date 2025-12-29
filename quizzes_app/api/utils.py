@@ -7,7 +7,7 @@ from google import genai
 from django.conf import settings
 
 def extract_video_id(url):
-    """
+    r"""
     Extracts the YouTube video ID from a given URL.
 
     The extraction relies on a Regular Expression (Regex) to handle various YouTube URL formats.
